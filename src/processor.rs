@@ -5,22 +5,29 @@ use firewheel::{
     node::{AudioNodeProcessor, ProcBuffers, ProcInfo, ProcessStatus},
 };
 
-use crate::{
-    node::{SineNode, SineNodePatch},
-    wavetable::{WaveTable, WaveTableSampler},
-};
+use crate::wavetable::{WaveTableGenerator, WaveTableSampler, WaveType};
 
 /// A processer with `N` samplers
 #[derive(Clone, Copy, PartialEq, Debug, Diff, Patch)]
 pub struct WaveTableProcessor<const N: usize> {
-    wave_table: WaveTable<64>,
+    sine_wave: [f32; 64],
+    triangle_wave: [f32; 64],
+    saw_wave: [f32; 64],
+    square_wave: [f32; 64],
+    base_frequency: f32,
     samplers: [WaveTableSampler; N],
+    enabled: bool,
 }
 
 impl<const N: usize> WaveTableProcessor<N> {
-    pub fn new(samplers: [WaveTableSampler; N]) -> Self {
+    pub fn new(enabled: bool, base_frequency: f32, samplers: [WaveTableSampler; N]) -> Self {
         Self {
-            wave_table: WaveTable::<64>::default(),
+            enabled,
+            sine_wave: WaveTableGenerator::sin::<64>(),
+            triangle_wave: WaveTableGenerator::triangle::<64>(),
+            saw_wave: WaveTableGenerator::saw::<64>(),
+            square_wave: WaveTableGenerator::square::<64>(),
+            base_frequency,
             samplers,
         }
     }
@@ -31,18 +38,12 @@ impl<const N: usize> AudioNodeProcessor for WaveTableProcessor<N> {
         &mut self,
         buffers: ProcBuffers,
         _proc_info: &ProcInfo,
-        _events: &mut NodeEventList,
+        events: &mut NodeEventList,
         _logger: &mut firewheel::log::RealtimeLogger,
     ) -> ProcessStatus {
-        // for patch in events.drain_patches::<SineNode>() {
+        // for patch in events.drain_patches::<WaveTableNode>() {
         //     match patch {
-        //         SineNodePatch::Frequency(freq) => {
-        //             self.set_frequency(freq);
-        //         }
-        //         SineNodePatch::SampleRate(r) => self.set_sample_rate(r),
-        //         SineNodePatch::Enabled(_e) => {
-        //             panic!("not supported");
-        //         }
+        //         WaveTableNodePatch::BaseFrequency(f) => self.base_frequency = f,
         //     };
         // }
 
@@ -50,7 +51,15 @@ impl<const N: usize> AudioNodeProcessor for WaveTableProcessor<N> {
             *s = self
                 .samplers
                 .iter_mut()
-                .map(|s| s.sample(&self.wave_table))
+                .map(|s| {
+                    let wave_table = match s.wave_type {
+                        WaveType::Sine => &self.sine_wave,
+                        WaveType::Square => &self.square_wave,
+                        WaveType::Triangle => &self.triangle_wave,
+                        WaveType::Saw => &self.saw_wave,
+                    };
+                    s.sample(wave_table)
+                })
                 .sum::<f32>()
                 / N as f32;
         }

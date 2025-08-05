@@ -1,10 +1,12 @@
 use firewheel::{FirewheelContext, error::UpdateError, node::NodeID};
 
-use crate::node::SineNode;
+use crate::node::WaveTableNode;
 
 pub struct AudioSystem {
     pub cx: FirewheelContext,
-    sine_node: SineNode,
+    #[expect(dead_code)]
+    sine_node: WaveTableNode,
+    #[expect(dead_code)]
     sine_node_id: NodeID,
 }
 
@@ -13,7 +15,7 @@ impl AudioSystem {
         let mut cx = FirewheelContext::new(Default::default());
         cx.start_stream(Default::default()).unwrap();
 
-        let sine_node = SineNode::default();
+        let sine_node = WaveTableNode::default();
         let sine_node_id = cx.add_node(sine_node, None);
 
         let graph_out_node_id = cx.graph_out_node_id();
