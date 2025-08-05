@@ -3,6 +3,8 @@ use std::time::Duration;
 use audio::AudioSystem;
 
 mod audio;
+mod node;
+mod processor;
 mod wavetable;
 
 fn main() {
