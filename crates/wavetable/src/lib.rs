@@ -1,3 +1,4 @@
+#[cfg(feature = "firewheel")]
 use firewheel::diff::{Diff, Patch};
 
 pub struct WaveTableGenerator;
@@ -54,7 +55,8 @@ impl WaveTableGenerator {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Debug, Diff, Patch)]
+#[derive(Clone, Copy, PartialEq, Debug)]
+#[cfg_attr(feature = "firewheel", derive(Diff, Patch))]
 pub enum WaveType {
     Sine,
     Square,
@@ -62,7 +64,8 @@ pub enum WaveType {
     Saw,
 }
 
-#[derive(Clone, Copy, PartialEq, Debug, Diff, Patch)]
+#[derive(Clone, Copy, PartialEq, Debug)]
+#[cfg_attr(feature = "firewheel", derive(Diff, Patch))]
 /// Samples a wave table at a given frequency and sample rate
 pub struct WaveTableSampler {
     pub sample_rate: u32,

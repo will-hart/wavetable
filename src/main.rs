@@ -2,10 +2,8 @@ use std::time::Duration;
 
 use audio::AudioSystem;
 
-mod audio;
-mod node;
-mod processor;
-mod wavetable;
+pub mod audio;
+pub mod nodes;
 
 fn main() {
     let mut audio = AudioSystem::new();

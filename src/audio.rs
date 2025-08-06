@@ -1,6 +1,6 @@
 use firewheel::{FirewheelContext, error::UpdateError, node::NodeID};
 
-use crate::node::WaveTableNode;
+use crate::nodes::wavetable::WaveTableNode;
 
 pub struct AudioSystem {
     pub cx: FirewheelContext,

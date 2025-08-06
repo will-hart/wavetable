@@ -1,8 +1,9 @@
 [package]
-name = "wavetable"
+name = "synth"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 firewheel = "0.6.4-beta.0"
-# firewheel = { git = "https://github.com/BillyDM/Firewheel", branch="main" }
+
+wavetable = { path = "./crates/wavetable" }

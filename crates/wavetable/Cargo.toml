@@ -1,0 +1,11 @@
+[package]
+name = "wavetable"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+firewheel = { version = "0.6.4-beta.0", optional = true }
+
+[features]
+default = ["firewheel"]
+firewheel = ["dep:firewheel"]

@@ -4,8 +4,7 @@ use firewheel::{
     event::NodeEventList,
     node::{AudioNodeProcessor, ProcBuffers, ProcInfo, ProcessStatus},
 };
-
-use crate::wavetable::{WaveTableGenerator, WaveTableSampler, WaveType};
+use wavetable::{WaveTableGenerator, WaveTableSampler, WaveType};
 
 /// A processer with `N` samplers
 #[derive(Clone, Copy, PartialEq, Debug, Diff, Patch)]
@@ -38,7 +37,7 @@ impl<const N: usize> AudioNodeProcessor for WaveTableProcessor<N> {
         &mut self,
         buffers: ProcBuffers,
         _proc_info: &ProcInfo,
-        events: &mut NodeEventList,
+        _events: &mut NodeEventList,
         _logger: &mut firewheel::log::RealtimeLogger,
     ) -> ProcessStatus {
         // for patch in events.drain_patches::<WaveTableNode>() {
@@ -48,20 +47,18 @@ impl<const N: usize> AudioNodeProcessor for WaveTableProcessor<N> {
         // }
 
         for s in buffers.outputs[0].iter_mut() {
-            *s = self
-                .samplers
-                .iter_mut()
-                .map(|s| {
-                    let wave_table = match s.wave_type {
-                        WaveType::Sine => &self.sine_wave,
-                        WaveType::Square => &self.square_wave,
-                        WaveType::Triangle => &self.triangle_wave,
-                        WaveType::Saw => &self.saw_wave,
-                    };
-                    s.sample(wave_table)
-                })
-                .sum::<f32>()
-                / N as f32;
+            let mut val = 0.0;
+            for sampler in self.samplers.iter_mut() {
+                let wave_table = match sampler.wave_type {
+                    WaveType::Sine => &self.sine_wave,
+                    WaveType::Square => &self.square_wave,
+                    WaveType::Triangle => &self.triangle_wave,
+                    WaveType::Saw => &self.saw_wave,
+                };
+                val += sampler.sample(wave_table);
+            }
+
+            *s = val / N as f32;
         }
 
         ProcessStatus::OutputsModified {
