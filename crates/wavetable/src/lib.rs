@@ -69,7 +69,6 @@ pub enum WaveType {
 /// Samples a wave table at a given frequency and sample rate
 pub struct WaveTableSampler {
     pub sample_rate: u32,
-    pub base_frequency: f32,
     pub frequency_multiplier: f32,
     pub index: f32,
     pub wave_type: WaveType,
@@ -79,7 +78,6 @@ impl Default for WaveTableSampler {
     fn default() -> Self {
         Self {
             sample_rate: 44_100,
-            base_frequency: 220.0,
             frequency_multiplier: 1.0,
             index: 0.0,
             wave_type: WaveType::Sine,
@@ -89,7 +87,7 @@ impl Default for WaveTableSampler {
 
 impl WaveTableSampler {
     /// Gets a sample and increments the internal buffer to the next sample
-    pub fn sample<const R: usize>(&mut self, table: &[f32; R]) -> f32 {
+    pub fn sample<const R: usize>(&mut self, base_frequency: f32, table: &[f32; R]) -> f32 {
         let current_index = self.index as usize;
         let next_index = (current_index + 1) % R;
 
@@ -100,8 +98,7 @@ impl WaveTableSampler {
 
         let table_size = R as f32;
         self.index = (self.index
-            + table_size * self.base_frequency * self.frequency_multiplier
-                / self.sample_rate as f32)
+            + table_size * base_frequency * self.frequency_multiplier / self.sample_rate as f32)
             % table_size;
 
         sample

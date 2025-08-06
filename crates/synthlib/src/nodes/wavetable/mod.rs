@@ -16,7 +16,6 @@ pub struct WaveTableNode;
 #[derive(Debug, Clone, Copy)]
 pub struct WaveTableProcessorConfig {
     pub base_frequency: f32,
-    pub sample_rate: u32,
     pub enabled: bool,
 }
 
@@ -24,7 +23,6 @@ impl Default for WaveTableProcessorConfig {
     fn default() -> Self {
         Self {
             base_frequency: 440.0,
-            sample_rate: 44100,
             enabled: true,
         }
     }
@@ -37,7 +35,7 @@ impl AudioNode for WaveTableNode {
         AudioNodeInfo::new()
             .debug_name("sine_node")
             .channel_config(ChannelConfig {
-                num_inputs: ChannelCount::ZERO,
+                num_inputs: ChannelCount::MONO,
                 num_outputs: ChannelCount::MONO,
             })
     }
@@ -45,29 +43,26 @@ impl AudioNode for WaveTableNode {
     fn construct_processor(
         &self,
         config: &Self::Configuration,
-        _cx: firewheel::node::ConstructProcessorContext,
+        cx: firewheel::node::ConstructProcessorContext,
     ) -> impl AudioNodeProcessor {
         let processor = WaveTableProcessor::new(
             config.enabled,
             config.base_frequency,
             [
                 WaveTableSampler {
-                    sample_rate: config.sample_rate,
-                    base_frequency: config.base_frequency,
+                    sample_rate: cx.stream_info.sample_rate.into(),
                     frequency_multiplier: 0.15,
                     wave_type: WaveType::Square,
                     ..Default::default()
                 },
                 WaveTableSampler {
-                    sample_rate: config.sample_rate,
-                    base_frequency: config.base_frequency,
+                    sample_rate: cx.stream_info.sample_rate.into(),
                     frequency_multiplier: 1.2,
                     wave_type: WaveType::Sine,
                     ..Default::default()
                 },
                 WaveTableSampler {
-                    sample_rate: config.sample_rate,
-                    base_frequency: config.base_frequency,
+                    sample_rate: cx.stream_info.sample_rate.into(),
                     frequency_multiplier: 0.9,
                     wave_type: WaveType::Triangle,
                     ..Default::default()

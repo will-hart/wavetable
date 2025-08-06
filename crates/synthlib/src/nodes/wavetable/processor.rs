@@ -1,13 +1,12 @@
 use firewheel::{
     SilenceMask,
-    diff::{Diff, Patch},
     event::NodeEventList,
     node::{AudioNodeProcessor, ProcBuffers, ProcInfo, ProcessStatus},
 };
 use wavetable::{WaveTableGenerator, WaveTableSampler, WaveType};
 
 /// A processer with `N` samplers
-#[derive(Clone, Copy, PartialEq, Debug, Diff, Patch)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct WaveTableProcessor<const N: usize> {
     sine_wave: [f32; 64],
     triangle_wave: [f32; 64],
@@ -40,13 +39,7 @@ impl<const N: usize> AudioNodeProcessor for WaveTableProcessor<N> {
         _events: &mut NodeEventList,
         _logger: &mut firewheel::log::RealtimeLogger,
     ) -> ProcessStatus {
-        // for patch in events.drain_patches::<WaveTableNode>() {
-        //     match patch {
-        //         WaveTableNodePatch::BaseFrequency(f) => self.base_frequency = f,
-        //     };
-        // }
-
-        for s in buffers.outputs[0].iter_mut() {
+        for (idx, s) in buffers.outputs[0].iter_mut().enumerate() {
             let mut val = 0.0;
             for sampler in self.samplers.iter_mut() {
                 let wave_table = match sampler.wave_type {
@@ -55,7 +48,7 @@ impl<const N: usize> AudioNodeProcessor for WaveTableProcessor<N> {
                     WaveType::Triangle => &self.triangle_wave,
                     WaveType::Saw => &self.saw_wave,
                 };
-                val += sampler.sample(wave_table);
+                val += sampler.sample(buffers.inputs[0][idx], wave_table);
             }
 
             *s = val / N as f32;
