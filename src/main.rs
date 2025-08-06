@@ -1,12 +1,7 @@
 use std::time::Duration;
 
-use audio::AudioSystem;
-
-pub mod audio;
-pub mod nodes;
-
 fn main() {
-    let mut audio = AudioSystem::new();
+    let mut audio = synthlib::audio::AudioSystem::new();
 
     for _ in 0..84_200 {
         audio.update();

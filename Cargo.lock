@@ -1177,6 +1177,15 @@ name = "synth"
 version = "0.1.0"
 dependencies = [
  "firewheel",
+ "synthlib",
+ "wavetable",
+]
+
+[[package]]
+name = "synthlib"
+version = "0.1.0"
+dependencies = [
+ "firewheel",
  "wavetable",
 ]
 

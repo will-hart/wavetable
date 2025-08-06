@@ -6,4 +6,5 @@ edition = "2024"
 [dependencies]
 firewheel = "0.6.4-beta.0"
 
+synthlib = { path = "./crates/synthlib" }
 wavetable = { path = "./crates/wavetable" }
